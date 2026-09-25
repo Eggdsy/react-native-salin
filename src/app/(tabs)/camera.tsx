@@ -37,9 +37,16 @@ export default function CameraScreen() {
   // Background Frame Processor running at 30+ FPS
   const frameProcessor = useFrameProcessor((frame) => {
     'worklet';
+    
+    // @ts-ignore - It is globally injected by the C++ layer now
     const result = detectHandLandmarks(frame);
-    updateFSLTranslation(result?.hands);
-  }, []);
+    
+    if (result && result.hands) {
+      updateFSLTranslation(result.hands);
+    } else {
+      updateFSLTranslation([]);
+    }
+  }, [updateFSLTranslation]);
 
   if (!hasPermission) {
     return (
