@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router'; // Replaced @react-navigation/native
+import { useFocusEffect } from 'expo-router';
 import { detectHandLandmarks } from 'expo-vision-camera-v4-mediapipe';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -21,13 +21,16 @@ export default function CameraScreen() {
   );
   
   const [translation, setTranslation] = useState('Waiting for sign...');
+  const [handLandmarks, setHandLandmarks] = useState<any[]>([]); 
 
   // Thread-safe JS callback hook to update UI from the background thread
   const updateFSLTranslation = useRunOnJS((handData: any) => {
     if (handData && handData.length > 0) {
       setTranslation('Hands Detected!'); 
+      setHandLandmarks(handData); 
     } else {
       setTranslation('Waiting for sign...');
+      setHandLandmarks([]); 
     }
   }, []);
 
@@ -72,6 +75,26 @@ export default function CameraScreen() {
         frameProcessor={frameProcessor}
         pixelFormat="yuv"
       />
+
+      {/* Draw the landmarks over the camera */}
+      {handLandmarks.map((hand, handIndex) => (
+        <View key={`hand-${handIndex}`} style={StyleSheet.absoluteFill}>
+          {hand.map((landmark: any, jointIndex: number) => (
+            <View
+              key={`joint-${jointIndex}`}
+              style={{
+                position: 'absolute',
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: '#10B981', // Emerald green joints
+                left: landmark.x, 
+                top: landmark.y,
+              }}
+            />
+          ))}
+        </View>
+      ))}
 
       <View style={styles.overlay}>
         <View style={styles.topControls}>
