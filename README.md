@@ -1,56 +1,41 @@
-# Welcome to your Expo app 👋
+# Salin: Real-Time FSL Translation
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native Expo application designed to translate Filipino Sign Language (FSL) gestures in real-time. The project leverages `react-native-vision-camera` paired with a globally injected `expo-vision-camera-v4-mediapipe` native C++ module, running complex hand-tracking Worklets on a background thread at high frame rates.
 
-## Get started
+## Local Development Setup
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+To run the Metro bundler locally and serve JavaScript updates to your custom development client, use the following command:
 
 ```bash
-npm run reset-project
+npx expo start -c --dev-client
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+-c: Clears the Metro bundler cache to ensure modified Worklet dependencies and JavaScript closures are processed cleanly.
+--dev-client: Directs the bundler to connect to the custom native APK rather than the standard Expo Go app.
 
-### Other setup steps
+EAS Cloud Build Instructions
+Because the application relies on custom C++ MediaPipe binaries and a raw .task model file, it cannot run in Expo Go. You must compile a custom development APK using Expo Application Services (EAS).
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Prior to building, ensure all critical files (app.json, assets/hand_landmarker.task, and source code) are firmly committed to Git. EAS Cloud Build ignores uncommitted local files and pulls strictly from your Git history.
 
-## Learn more
+```bash
+git add .
+git commit -m "Prepare for EAS development build"
+eas build --platform android --profile development --clear-cache
+```
+Testing on a Physical Device
+1.Follow these sequential steps to deploy and test the native MediaPipe engine on an Android device:
 
-To learn more about developing your project with Expo, look at the following resources:
+2.Execute the EAS build command above and allow the cloud compilation to complete.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+3.Download the compiled .apk file using the URL provided in your terminal or via the online Expo Dashboard.
 
-## Join the community
+4.Completely uninstall any existing versions of the Salin app from your Android device to prevent native module cache conflicts or ghost builds.
 
-Join our community of developers creating universal apps.
+5.Install the newly downloaded APK onto your physical Android device.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+6.Start your local development server using the local setup command (npx expo start -c --dev-client).
+
+7.Launch the Salin app on your device, grant the requested camera permissions, and scan the QR code or connect to your local Metro server URL.
+
+8.Place your hands in the camera frame to verify the native MediaPipe engine is successfully tracking and rendering the emerald green landmark joints.
