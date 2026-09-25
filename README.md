@@ -24,6 +24,7 @@ git commit -m "Prepare for EAS development build"
 eas build --platform android --profile development --clear-cache
 ```
 Testing on a Physical Device
+
 1.Follow these sequential steps to deploy and test the native MediaPipe engine on an Android device:
 
 2.Execute the EAS build command above and allow the cloud compilation to complete.
