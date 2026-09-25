@@ -29,9 +29,9 @@ Testing on a Physical Device
 
 Follow these sequential steps to deploy and test the native MediaPipe engine on an Android device:
 
-1. Execute the EAS build command above and allow the cloud compilation to complete.
+1.Execute the EAS build command above and allow the cloud compilation to complete.
 
-2. Download the compiled .apk file using the URL provided in your terminal or via the online Expo Dashboard.
+2.Download the compiled .apk file using the URL provided in your terminal or via the online Expo Dashboard.
 
 3.Completely uninstall any existing versions of the Salin app from your Android device to prevent native module cache conflicts or ghost builds.
 
