@@ -46,7 +46,8 @@
       [
         "react-native-vision-camera",
         {
-          "cameraPermissionText": "Allow Salin to access your camera to translate FSL gestures."
+          "cameraPermissionText": "Allow Salin to access your camera to translate FSL gestures.",
+          "enableCodeScanner": false
         }
       ],
       [
