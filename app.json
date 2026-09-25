@@ -55,11 +55,25 @@
           "numHands": 2,
           "minDetectionConfidence": 0.5
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "ndkVersion": "26.1.10909125"
+          }
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "66c8f342-3554-4203-a086-8f2de0df5b49"
+      }
     }
   }
 }

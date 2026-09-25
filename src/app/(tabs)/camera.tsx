@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router'; // Replaced @react-navigation/native
 import { detectHandLandmarks } from 'expo-vision-camera-v4-mediapipe';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Camera, useCameraDevice, useCameraPermission, useFrameProcessor } from 'react-native-vision-camera';
 import { useRunOnJS } from 'react-native-worklets-core';
@@ -10,25 +11,30 @@ export default function CameraScreen() {
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice(facing);
   
+  // Safely track focus state using Expo Router to prevent background crashes
+  const [isFocused, setIsFocused] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      setIsFocused(true); 
+      return () => setIsFocused(false); 
+    }, [])
+  );
+  
   const [translation, setTranslation] = useState('Waiting for sign...');
 
-  // 1. Thread-safe JS callback hook to update UI from the background thread
+  // Thread-safe JS callback hook to update UI from the background thread
   const updateFSLTranslation = useRunOnJS((handData: any) => {
     if (handData && handData.length > 0) {
-      // You have access to handData[0] for the first hand's 21 3D coordinates
       setTranslation('Hands Detected!'); 
     } else {
       setTranslation('Waiting for sign...');
     }
   }, []);
 
-  // 2. Background Frame Processor running at 30+ FPS
+  // Background Frame Processor running at 30+ FPS
   const frameProcessor = useFrameProcessor((frame) => {
     'worklet';
-    // Run MediaPipe natively on the raw camera frame
     const result = detectHandLandmarks(frame);
-    
-    // Call the JS function safely (useRunOnJS bridges the native C++ thread to JS)
     updateFSLTranslation(result?.hands);
   }, []);
 
@@ -50,7 +56,7 @@ export default function CameraScreen() {
   }
 
   if (!device) {
-    return <View style={styles.container} />; // Or a loading spinner
+    return <View style={styles.container} />;
   }
 
   const toggleCameraFacing = () => {
@@ -62,21 +68,18 @@ export default function CameraScreen() {
       <Camera 
         style={styles.camera} 
         device={device}
-        isActive={true}
+        isActive={isFocused} 
         frameProcessor={frameProcessor}
         pixelFormat="yuv"
       />
 
       <View style={styles.overlay}>
-        
-        {/* Top Controls */}
         <View style={styles.topControls}>
           <TouchableOpacity style={styles.iconButton} onPress={toggleCameraFacing} activeOpacity={0.7}>
             <Ionicons name="camera-reverse" size={24} color="#111827" />
           </TouchableOpacity>
         </View>
 
-        {/* Center Guide Box */}
         <View style={styles.guideContainer}>
           <View style={styles.guideBox}>
             <View style={styles.guideLabelContainer}>
@@ -85,7 +88,6 @@ export default function CameraScreen() {
           </View>
         </View>
 
-        {/* Bottom Translation Flashcard */}
         <View style={styles.translationContainer}>
           <View style={styles.flashcard}>
             <View style={styles.flashcardHeader}>
@@ -95,7 +97,6 @@ export default function CameraScreen() {
             <Text style={styles.translationOutput}>{translation}</Text>
           </View>
         </View>
-
       </View>
     </View>
   );
@@ -117,8 +118,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'space-between',
   },
-  
-  // Permissions Screen Styling
   permissionContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -166,8 +165,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-
-  // Live Camera UI Styling
   topControls: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -192,7 +189,7 @@ const styles = StyleSheet.create({
     width: 280,
     height: 320,
     borderWidth: 3,
-    borderColor: 'rgba(79, 70, 229, 0.8)', // Indigo border
+    borderColor: 'rgba(79, 70, 229, 0.8)',
     borderStyle: 'dashed',
     borderRadius: 24,
     justifyContent: 'flex-end',
@@ -204,7 +201,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    marginBottom: -32, // Pulls the label down onto the border line
+    marginBottom: -32,
   },
   guideText: {
     color: '#ffffff',
